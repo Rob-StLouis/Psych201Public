@@ -150,6 +150,10 @@ $$kurtosis(\sum^n X) = \frac{1}{n} * kurtosis(x)$$
 
 This more or less underlies most statistics. There is the assumption that as you increase n, the expectation about the sum of the added random variables starts to resemble a normal variable (though normally you divide this value by n). This is cool.
 
+**The actual Central limit theorem**
+
+$P(\bar(X)_{n}) \rightarrow N(\mu_X, \frac{\sigma_X}{\sqrt{n}}$
+
 
 ## Normal variable 
 
@@ -158,7 +162,7 @@ Here X is distributed according to the following function.
 $P(x|\mu,\sigma) = \dfrac{1}{\sqrt{2 \pi \sigma^2}} e^{ \left[- \dfrac{x-\mu}{2\sigma^2} \right]}$
 
 Check in R
-```{r}
+```{r,tidy=TRUE,fig.height=2}
 
 gauss <- function(x, mu, sigma){
   const <- 1 / sqrt( 2 * pi * sigma^2)
@@ -172,7 +176,141 @@ qplot(x,gauss(x,0,1))
 qplot(x,dnorm(x))
 ```
 
-##Powerball Example
+
+
+## Laws of large numbers 
+
+If you have now taken the sum of this set of random variables, you can now get the expected value of the mean and variance by diving by n. I think this means that there is a careful set
+
+* Strong Law of large numbers 
+
+$$\bar{X} \rightarrow Mean[X]$$
+
+
+* Weak Law of large numbers 
+
+$$Prob(\bar{X}-\mu>e) \rightarrow 1$$
+
+
+* Borels Law of large numbers
+
+$$\dfrac{\sum{i=1}^n x}{n} \rightarrow P(X=x) $$
+
+* Monte Carlo principle
+
+$$\frac{1}{n} \sum{i=1}^nf(x^i) \rightarrow E_{P(x)}[f(X)]$$
+
+
+
+## Multivariate extension
+
+Fill in later
+
+
+#Sampling Theory
+
+##Expected Value of the mean
+
+Knowing the following
+$$Mean[\sum_{}^n X] = n * Mean[X]$$
+$$Variance[\sum_{}^n X] = n * Variance[X]$$
+$$skew(\sum_{}^n X) = \frac{1}{\sqrt{n}} * skew(x)$$
+$$kurtosis(\sum^n X) = \frac{1}{n} * kurtosis(x)$$
+
+
+What is the distribution we can expect when we sum X iid variables and divide by n. This is hte sampling distribution of the sample mean. 
+Sample mean of n iid variables is is viewed as the distribution that results from the following.
+$\dfrac{X_1+X_2+...+X_n}{n}$
+
+So sum up the distributions, divide the sums by n, which gives us  the sampling distribution
+
+$$Mean[\frac{1}{n} * \sum_{}^n X] = Mean[X]$$
+$$Variance[\frac{1}{n} * \sum_{}^n X] = \frac{1}{n^2} * n * Variance[X] = \frac{1}{n} *Variance[X]$$
+
+*If there is time, solve the following.* Right now, just take as an article of faith that they converge rapidly to the parametrs of a normal distribution.
+$$skew(\frac{1}{n} * \sum_{}^n X) = ?$$
+$$kurtosis(\frac{1}{n} * \sum^n X) = ?$$
+
+What this means is the central limit theorem. 
+$$P(\bar(X)_{n}) \rightarrow N(\mu_X, \frac{\sigma_X}{\sqrt{n}}$$
+
+ 
+#Z (Standard Normal) distribution
+
+The $N(0,1) distribution. Can transform distribution x to a z distribution with the following forumula 
+$z_x = (x-\mu_x)/sd_x$ Subtract the population mean, divide by the population standard deviation. 
+
+Particularly valuable because it allows one to compare different distributions. Often one looks at the z score transform of the sample mean, as it lets one run tests of it's value.
+
+##pdf,cdf, icdf   
+
+Here are the r commands, same for continuous and discrete probability density functions.   
+
+```{r,fig.height=2,tidy=TRUE}
+#pdf Probability mass function - what is the probability of this specific point, not really interpretable in a continuous distribution, but useful for discrete distributions.
+x = 1:6000/1000 -3
+qplot(x,dnorm(x))
+
+#cdf Cumulative Density Function what is the probability of observing this this value or any value that is lower. This is inclusive the x value, which is important to remember for discrete distributions
+x = 1:6000/1000 -3
+qplot(x,pnorm(x))
+
+#icdf,Inverse Cumulative Density function or quatile distribution. With this distribution, it returns the value such that p% of the probability distribution is lower than that value.
+p <- 1:1000/ 1000
+qplot(p, qnorm(p))
+
+
+```
+
+ -Not refer to law of total probability in the answers, particularly as numerator in bayes equation. 
+ 
+
+
+#Null Hypothesis Sampling Testing.
+
+## Confidence intervals
+  
+  - Identify the regions where there is an X% of the probability falls inside the value of that confidnece interval. 
+  - Are weird and non-intuitive 
+    + sample mean is random variable
+    + population mean is fixed point value
+    + can't say anything about probility distribution of population mean
+    + can say- if we drew infinite sample of this size and calculated the 95%CI, then 95% of these intervals will cover sample mean
+    + This is referred to as coverage, and frequentist statistics is optimized for this value.
+- Frequentist procedures more concerned with procedure
+- The Bayesian credible interval, under reasonable assumptions very closely resembles the confidence interval. 
+
+Quick sanity check
+```{r}
+x <- rnorm(10000,3,5)
+#95CI on the sample error
+meanx <- 3
+varx <- 5^2/10000
+sdx <- 5/sqrt(10000) 
+#lower bound
+qnorm(.05/2,meanx,sdx)
+#upper bound
+meanx+(meanx-qnorm(.05/2,meanx,sdx))
+ci(x)
+```
+
+
+## Significance testing.
+
+Terms
+
+$\alpha$ - probability that you will observe outcomes more extreme than one's cuttoff for significance, conditional on the null hypothesis being true.
+
+```{r}
+
+```
+
+
+
+
+#Examples and Excercises
+
+##Powerball Examples
 Expected Value of Powerball lottery.
 - Five white balls drawn without replacement from 59, order irrelevant
 - red ball drawn from bin of 35
@@ -209,73 +347,3 @@ permutations(n=5,r=3,repeats.allowed=F) %>%
 ```
 
 
-## Law of large numbers 
-
-If you have now taken the sum of this set of random variables, you can now get the expected value of the mean and variance by diving by n. I think this means that there is a careful set
-
-
-## Multivariate extension
-
-
-
-
-##Calculating Sample Variance
-
-
-
-##Combining variances.
-
-
-  
-
- 
-
-
-
-
-
-
-
-Shape - skewness kurtosis
-
--How do you calculate these, can you recognize them in a graph.
-
-
-
-
-##Reading and estimating from graphs
-```{r}
-
-
-```
-
-# Probability Distributions.
-
-
-
-##pdf,cdf, icdf   
-
-Here are the r commands, same for continuous and discrete probability density functions.   
-
-
-```{r, echo=FALSE}
-#pdf Probability mass function
-x = 1:6000/1000 -3
-qplot(x,dnorm(x))
-
-#cdf Cumulative Density Function
-x = 1:6000/1000 -3
-qplot(x,pnorm(x))
-
-#icdf,Inverse Cumulative Density function or quantile distribution, 
-p <- 1:1000/ 1000
-qplot(p, qnorm(p))
-```
-
- -Not refer to law of total probability in the answers, particularly as numerator in bayes equation. 
- 
- 
-#Random Variables and Expectation
-
-
-#Null Hypothesis Sampling Testing.
