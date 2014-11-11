@@ -13,8 +13,25 @@ library(ggplot2)
 library(dplyr)
 library(magrittr)
 library(moments)
+library(combinat)
+library(gtools)
+
 ```
 \pagebreak
+
+#Permutation Rules 
+
+Number of permutations with replacement, any possible order
+
+ $n^r$ : $n$ is number of items to choose from, $r$ is number chosen 
+ 
+Total Number of permutations without replacement, 
+
+$$\dfrac{n!}{(n-r)!}$$
+
+Number of permuatations without replacement, but not requiring a specific order
+
+$$\dfrac{n!}{r!(n-r)!} $$
 
 
 #Univariate descriptive Statistics
@@ -100,11 +117,13 @@ However, because the kurtosis is equal to three in a normal distribution, is is 
 
 \(M_4 = \beta_2=\dfrac{\mu_3}{\sigma^3}  = E[ \left(\dfrac{(E[(X-\mu)^4]}{E[(X-
 mu)^2]^2}\right) -3]   \) 
+\pagebreak
+
 
 
 ##Central Limit theorem. 
 
-Proof by assertion. It's an interesting idea. What happens when you start to sum n, iid variables. This is interesting as it assumes it observation is itself a draw from an independent distribution (which i guess is restating it's assumption). If you know the nature of the underlying distribution, you can calculate your expectation about the mean, variance, skew and kurtosis of the sum of the variables. 
+Proof by assertion. It's an interesting idea. What happens when you start to sum n, iid variables. This is interesting as it assumes it observation is itself drawn from an independent distribution (which i guess is restating it's assumption). If you know the nature of the underlying distribution, you can calculate your expectation about the mean, variance, skew and kurtosis of the sum of the variables. 
 
 Rules for adding or summing variables. 
 
@@ -113,19 +132,22 @@ $Mean(aX) = a * Mean(X)$
 $Var(X+Y) = Var(X) + Var(Y)$  
 $Var(aX) = a^2 * Var(X)$  
 
-Question 
+Question:
 
-Var(X+Y) = Var(X) + Var (Y)
-if Y = X 
-why does Var(2*X) =! Var(X + X) not clear, I guess different quantaties
+Var(X+Y) = Var(X) + Var (Y)   
+if Y = X   
+why does Var(2*X) =! Var(X + X)? Because they are different transformations, doing something very different. This is a dumb question rob.
 
 This means that if one starts to sum iid varables, n increases linearly. However, by assertion the kurtosis and skew start to fall towards zero, meaning that distribution of the sum of iid variables starts to look like a normal distribution. Apprently they increase like this, regardless of the initial distribution. 
 
-$skew(\sum^n X) = \frac{1}{\sqrt{n}} skew(x)$
+$$Mean[\sum_{}^n X] = n * Mean[X]$$
+$$Variance[\sum_{}^n X] = n * Variance[X]$$
 
-$kurtosis(\sum^n X) = \frac{1}{n} kurtosis(x)$
+$$skew(\sum_{}^n X) = \frac{1}{\sqrt{n}} * skew(x)$$
 
-This more or less underlies most statistics. There is the assumption that as you increase n, the expectation about the sum of the added random variables starts to resemble a normal variable (though normally you divide this value by n). This is 
+$$kurtosis(\sum^n X) = \frac{1}{n} * kurtosis(x)$$
+
+This more or less underlies most statistics. There is the assumption that as you increase n, the expectation about the sum of the added random variables starts to resemble a normal variable (though normally you divide this value by n). This is cool.
 
 
 ## Normal variable 
@@ -147,6 +169,42 @@ x<-1:600/100 - 3
 
 qplot(x,gauss(x,0,1))
 qplot(x,dnorm(x))
+```
+
+##Powerball Example
+Expected Value of Powerball lottery.
+- Five white balls drawn without replacement from 59, order irrelevant
+- red ball drawn from bin of 35
+- $2 to play
+- assume no other players
+
+What is the expected value 
+
+```{r}
+#probability of getting 5 white balls
+#five factorial 5 chances for first value, then 4 chances for second value, then..
+#out of 59 chances for first value, 58 chances for second value.
+white <- factorial(5) / prod((59-5):59)
+red <- 1/ 35
+Prob <- white*red
+
+#does it work for simplier example 
+#deck of 5 cards, draw three. need to get the three target values 1,2,3
+
+#first draw could be any of the three
+d1 <- 3/5
+#second draw the same.
+d2 <- 2/4
+#third draw the same
+d3 <- 1/3
+p  <- d1*d2*d3
+p
+
+#this gives us correct answer- check with permuations function.
+  
+permutations(n=5,r=3,repeats.allowed=F) %>%
+  data.frame %>%
+  summarise(win = mean(X1+X2+X3==6))
 ```
 
 
