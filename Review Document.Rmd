@@ -398,16 +398,194 @@ qplot(replicate(100000, t.sample(4)))
 ```
 
 
+##Degrees of Freedom.
+
+Basically how may datapoints wer free when estimating the variance- If we knew the mean, standard deviation and the values of X points, at what point can we fully determine the values of the remain n-X points. X is standard deviation. For estimating variance X = n-1. Once we now n-1 values, the variance and the mean, we can fully determine the last value.
+
+## Deteriming Sample Standard Deviation- not sample mean
+
+
+### one sample 
+
+-Already done
+
+
+## two sample, equal variance
+
+We have two samples and two estimates of variance. However, we have assued variance is the same, so now we need to pool our estimates of the variance. 
+
+$$s_p^2 = \dfrac{(n_x-1)s_x^2 + (n_y -1)s_y^2}{n_x+n_y-2}$$
+
+Where $n_x$ and $n_y$ are sample size, and $s^2$ is their respective sample variance, calculated according to:
+
+$$\hat{\sigma}^2 = s^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i-\hat{x})^2$$
+
+Then we must use our earlier rules around adding variances to figure out how to identify the variance of the mean or the standard error. We are assuming that all the variables from each sample are distributed with possibly different means, but with the same variance. What we are trying go get the statistic of is what is the distribution of ? $\bar{x}- \bar{y}$, what is that value and what is its standard deviation. (standard error)
+
+So go through previous experience w/r/t adding up 
+
+$[x_1,....,x_n1] \sim P(X)$
+$[y_1,....,y_n1] \sim P(X)$
+
+$Mean[\bar{x}] = Mean[\bar{y}] =Mean[X]$
+
+
+$Variance[\bar{x}] = \dfrac{1}{n_x} variance[X]$  
+
+$Variance[\bar{y}] = \dfrac{1}{n_y} variance[X]$
+
+
+$$ Mean[\bar{x}] - Mean[\bar{y}]= 0 $$
+
+$$Variance[\bar{x}-\bar{y}]= \dfrac{1}{n_x}+ \dfrac{1}{n_y} + variance[X]$$
+
+$$\sigma_{\bar{x}-\bar{y}}= \sigma{x} * \sqrt{\dfrac{1}{n_x}+ \dfrac{1}{n_y} }$$
+
+Remember our smaple estimate of $\sigma_X$ is $s_p$.
+
+Bringing it all together. 
+
+$$t_{\bar{x}-\bar{y}} = \dfrac{\bar{x}-\bar{y}}{s_p} /  \sqrt{ \dfrac{1}{n_x} + \dfrac{1}{n_y}}$$
+
+Also remember, you need to estimate two means, so df = $n_x+n_y-2$.  I was getting this wrong because I was being foolish about the standard deviation vs variance, I need to be really careful about that here.
+```{r}
+
+x1 = c(618,606,735,627,679,622,712,772,728,550,594,681,578,689,672)
+x2 = c(571,569,613,693,714,521,530,736,677,626,722) 
+
+n1= length(x1)
+n2= length(x2)
+
+varx1<- sum((x1-mean(x1))^2) / (n1-1)
+
+varx2<- sum((x2-mean(x1))^2) / (n2-1)
+
+SampleVar<- ((50-1)*(varx1) + (50-1)*(varx2) ) / (50+50-2)
+
+SampleSD <- sqrt(SampleVar)
+
+SampleMeanSD <- SampleSD / sqrt((1/50)+(1/50)) 
+
+Tstat <- (mean(x1)-mean(x2)) / SampleSD / sqrt((1/50)+(1/50)) 
+
+Tstat
+#confirm with equal var ttest
+t.test(x1,x2,var.equal=T)
+
+```
+
+
+##paired t test, 
+
+-just run the subtraction and look at variance of the difference between pairs. Should be easy
+
+
+## Two sample, unequal variance
+
+Work out the math for two distributions drawn from same mean, but with different variances:
+
+$[x_1,....,x_n1] \sim P(X)$
+$[y_1,....,y_n1] \sim P(Y)$
+
+
+$Mean[\bar{x}] = Mean[X] =Mean[ \bar{y} ] =  Mean[Y]$
+
+
+
+$Variance[\bar{x}] = \dfrac{1}{n_x} variance[X]$  
+
+$Variance[\bar{y}] = \dfrac{1}{n_y} variance[Y]$
 
 
 
 
+$$ Mean[\bar{x}] - Mean[\bar{y}]= 0 $$
+
+$$Variance[\bar{x}-\bar{y}]= \dfrac{1}{n_x} variance[X]+\dfrac{1}{n_y} variance[Y]$$
+
+$$\sigma_{\bar{x}-\bar{y}}= \sqrt{ \dfrac{\sigma_X}{n_x}+\dfrac{\sigma_X}{n_x}}$$
 
 
+For the t statistic
+$$t_{\bar{x}-\bar{y}} = (\bar{x}-\bar{y}) / \sqrt{ \dfrac{s_{X}^2}{n_x}+\dfrac{s_{Y}^2}{n_y}}$$
+
+-not putting in formual for calculating df, as its absurdly complicated, but you
+
+r evaluation
+
+```{r}
+
+#sample 1 sd
+s1 <- 5
+#sample 1 n 
+n1 <- 10
+
+#sample 2 sd
+s2 <- 2
+#sample 2 n
+n2<- 50
+
+df = (s1^2/n1+s2^2/n2)^2/((s1^4/(n1^2*(n1-1)))+(s2^4/(n2^2*(n2-1))))
+
+```
+
+Putting it together
+```{r, tidy=TRUE}
+xD = c(25,11,16,13,33,21,26,31,14,22,31,10,26,26)
+yD = c(-9,-19,16,18,46,8,30,45,25,33,11,5,23,22,38,32,-2)
+
+m1 = mean(xD) 
+m2 = mean(yD)
+
+n1 = length(xD)
+s1 = sd(xD)
+n2 = length(yD)
+s2 = sd(yD)
+
+#t statistic
+t = (m1-m2)/sqrt(s1^2/n1 + s2^2/n2)
+t
+# df 
+df = (s1^2/n1+s2^2/n2)^2/((s1^4/(n1^2*(n1-1)))+(s2^4/(n2^2*(n2-1))))
+df
+#confirm with t test.
+t.test(xD,yD)
+```
+
+#Binomail Distributions
+
+##Details I'll probably add
+
+## Normal Approximation
+
+Define 
+
+$\hat{p} = \frac{k}{n}$
+
+where k  is number of success  and n is number of attempts
+
+If n is big enough. 
+
+- $\hat{p}$ will be normally distributed (central limit theorem)
+- $\hat{p}$ is expected to equal p, it is an unbiased estimator
+- $\hat{p}$ has variance $\frac{p*(1-p)}{N}$ - this is variance of the estimator
+- $\hat{p}$ therefor has standard error of$\sqrt{frac{p*(1-p)}{N}}$. 
+- so can run t tests on binomial data. 
+
+##Categorical Data
 
 
+#Statistics Ephemra
 
-
+Quantile Quantile Plts 
+```{r,tidy=TRUE,fig.height=2}
+a<-rnorm(10000)+rnorm(10000)
+a<-a^2
+a1<-rnorm(10000)
+b<-rt(10000,6)
+qqplot(a,a1)
+qqplot(a,b)
+```
 
 
 
@@ -449,4 +627,7 @@ permutations(n=5,r=3,repeats.allowed=F) %>%
   summarise(win = mean(X1+X2+X3==6))
 ```
 
+#Questions 
 
+-You don't use n-1 when calculating sd from sample, ofcourse not you have it 
+- you also don't use n-1 
