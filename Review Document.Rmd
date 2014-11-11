@@ -299,11 +299,114 @@ ci(x)
 
 Terms
 
-$\alpha$ - probability that you will observe outcomes more extreme than one's cuttoff for significance, conditional on the null hypothesis being true.
+Alpha - $\alpha$ - probability that you will observe outcomes more extreme than one's cuttoff for significance, conditional on the null hypothesis being true. Estimated frequency of Type 1 error.
 
-```{r}
+Cohen's d = \(d = | \frac{\mu_T - \mu _0}{\sigma_X} | \) - measure effective size generally use $\bar{x}$ for $\mu_t$.
+
+Power, or Beta - $\beta$ Probability of accepting rejecting null hypothesis, conditional on the alternative or tested hypothesis being true. Consequence of frequentist statistics. One identifies a value with alpha, where an observed value closer to the mean of the null hypothesis means the null hypothesis is accepted.
+
+**Strategy for Calculating Power**
+
+```{r,tidy=TRUE}
+
+#null hypothesis parameters
+mu0 <- 5
+sd0 <- 5
+#Alternative hypothesis parameters
+muT <- 10
+
+n <- 25
+alpha = .05
+
+#set up limits for null hpyothesis 
+dif<- abs(mu0 - qnorm(alpha/2,mu0,sd0/sqrt(n)))
+uplim  <- mu0+dif
+lowlim <- mu0-dif
+
+#now look at probability of seeing values outside that confidence interval, this is power
+
+above<- 1- pnorm(uplim, muT,sd0/sqrt(n))
+below<- pnorm(lowlim, muT,sd0/sqrt(n))
+
+EstPower<-above+below
+
+
 
 ```
+
+**Tricks for estimating power**
+
+```{r,tidy=TRUE}
+#check given above
+d <- abs((mu0-muT)/sd0)
+
+
+#power given effect size, it works but it is ignoring the probabiltiy that it will be rejected in the wrong way
+pow = 1 - pnorm( abs(qnorm(alpha / 2)) - d*sqrt(n) )
+pow == above
+#number needed for n- this doesn't include "other sideded power, but maybe not important"
+n.needed = ( abs( qnorm(alpha /2) - qnorm(pow) ) / d )^2
+
+```
+
+#T Test
+
+##Necessity  
+
+Basically using a systematically biased estimate of standard deviation leads to really wrong estimates of signifcance and is hard to correct. 
+
+By Assertion, we start to correct this by estimating the population  variance as 
+
+$$\hat{sigma}^2 = s^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i-\hat{x})^2$$
+
+Now the population standard devation is 
+
+$$\hat{sigma} = s = \sqrt{\dfrac{1}{n-1} \sum_{i=1}^n (x_i-\hat{x})^2}$$
+
+Then you could use the sample standard deviation (note, not the sample standard error) to calcualte z score
+
+$$Z_x = \sqrt{n} \big( \dfrac{\bar{x}-\mu_0}{s} \big)$$
+
+note this framing makes sense- you multiply by the square root of n, becuse the z score for the difference between the observed mean and the null mean increases with sample size.
+```{r,tidy=TRUE}
+x <- rnorm(10000,5,10)
+sqrt(10000) * (5-0) / 10
+(5-0) / (10 / sqrt(10000))
+```
+
+However, this doesn't work b/c the the z score calculated this way doesn't follow normal distribution, because the variance has sampling variation. This means statistics calculated from the z. What the above calculation actually gives you is the t score 
+
+$$t_{\bar{x}} =\sqrt{n} \big( \dfrac{\bar{x}-\mu_0}{s_x} \big) == dfrac{\bar{x}-\mu_0}{s_x / \sqrt{n}}$$
+
+You can see the problem if you hardcode the standard deviation, here at 1 as is dones in the z sample, vs estimate the standard devaition with the sd function. 
+
+```{r,tidy=TRUE,fig.height=2}
+
+z.sample = function(n){ 
+x = rnorm(n, 0, 1); 
+return( mean(x)/1*sqrt(n) ); 
+} 
+
+t.sample = function(n){ 
+x = rnorm(n, 0, 1); 
+return( mean(x)/sd(x)*sqrt(n) ); 
+} 
+
+qplot(replicate(100000, z.sample(4)))
+
+qplot(replicate(100000, t.sample(4)))
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
